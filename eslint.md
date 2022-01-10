@@ -137,73 +137,74 @@ rules: [
 
 ## 提交前检查:git commit 前检查
 
-    # 原理：通过 Git Hooks 实现的，Git Hook 也称之为 git 钩子，每个钩子都对应一个任务，通过 shell 脚本可以编写钩子任务触发时要具体执行的操作 #
+原理：通过 Git Hooks 实现的，Git Hook 也称之为 git 钩子，每个钩子都对应一个任务，通过 shell 脚本可以编写钩子任务触发时要具体执行的操作 #
 
-    1. shell
-    关注git提交前的代码检查，所以我们关注git commit这个钩子，使用步骤如下：
-    + 编写 hook 任务：项目的 .git/hooks 文件夹下新建一个 pre-commit 文件
+1.  shell
+    关注 git 提交前的代码检查，所以我们关注 git commit 这个钩子，使用步骤如下：
+
+    - 编写 hook 任务：项目的 .git/hooks 文件夹下新建一个 pre-commit 文件
+
     ```
     #!/bin/sh
     echo "before commit"
     ```
-    + 触发钩子：项目下执行 git commit 命令
-    <u>git commit命令执行后，可以发现commit操作不管是否成功，都可以看到输出的 before commit 信息。</u>
 
+    - 触发钩子：项目下执行 git commit 命令
+      <u>git commit 命令执行后，可以发现 commit 操作不管是否成功，都可以看到输出的 before commit 信息。</u>
 
-    2. 使用 husky 实现：编写node代码替代shell代码(帮助我们达成以 js 代码的方式来编写 hook 任务的目的。)
+2.  使用 husky 实现：编写 node 代码替代 shell 代码(帮助我们达成以 js 代码的方式来编写 hook 任务的目的。)
     (1): 安装 husky
-        安装好这个模块后，就可以在. git/hooks 文件夹下看到新添加的文件(pre-** post-** 等)
+    安装好这个模块后，就可以在. git/hooks 文件夹下看到新添加的文件(pre-** post-** 等)
     (2): 配置 husky 的 hook 任务：如下 package.json 任务
-    ```
-    "scripts": {
-        "test1": "echo before commit",
-        "test2": "node test2.js"
-    },
 
-    "husky": {
-        "hooks": {
-        "pre-commit": "yarn test2"
-        }
-    },
+        ```
+        "scripts": {
+            "test1": "echo before commit",
+            "test2": "node test2.js"
+        },
 
-    ```
+        "husky": {
+            "hooks": {
+            "pre-commit": "yarn test2"
+            }
+        },
 
-    (3): 触发钩子：git add -> git commit[单任务===>任务流]
+        ```
 
-        通过 lint-staged 来配合 husky 来实现
-        实现步骤如下：
+(3): 触发钩子：git add -> git commit[单任务===>任务流]
 
-            - 安装 husky 和 lint-staged 模块
-              `yarn add husky --dev yarn add lint-staged --dev`
+通过 lint-staged 来配合 husky 来实现
+实现步骤如下：
 
-            - 配置 husky 的 hook 任务流：如下 package.json 任务
+- 安装 husky 和 lint-staged 模块
 
-    ```
+```
+yarn add husky --dev
+yarn add lint-staged --dev
+```
+
+- 配置 husky 的 hook 任务流：如下 package.json 任务
+
+````
 
 "scripts": {
-"precommit": "lint-staged"
+    "precommit": "lint-staged"
 },
 "husky": {
-"hooks": {
-"pre-commit": "yarn precommit"
-}
+    "hooks": {
+        "pre-commit": "yarn precommit"
+    }
 },
 "lint-staged": {
-
-<!-- "\*.js":[
-"echo task1",
-"echo task2",
-"echo task3"
-] -->
-
-"\*.js":[
-"eslint --fix",
-"git add"
-]
+    "\*.js":[
+        "eslint --fix",
+        "git add"
+    ]
 }
 
-    ```
+```
 
 实现单任务相比而言，使用 lint-staged 之后，git commit 命令只有成功执行才会触发 lint stage 中的操作，且这些操作(对 js 文件有效)。
 
 ** 在我们执行 git commit 之后，就会触发 husky 配置的 pre-commit 的 hook 任务，而这个 hook 任务又把任务交给了 lint-staged 处理，进而通过 lint-staged 实现对 js 文件的代码检查以及自动风格修复后（还是错误则会中断提交）重新 add，而后再执行 commit 任务，保证了代码在提交前一定经过了代码检查。 **
+````
