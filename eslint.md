@@ -181,7 +181,7 @@ yarn add lint-staged --dev
 ```
 
 - 配置 husky 的 hook 任务流：如下 package.json 任务
-
+```
 "scripts": {
     "precommit": "lint-staged"
 },
@@ -196,6 +196,7 @@ yarn add lint-staged --dev
     "git add"
     ]
 }
+```
 
 实现单任务相比而言，使用 lint-staged 之后，git commit 命令只有成功执行才会触发 lint stage 中的操作，且这些操作(对 js 文件有效)。
 
